@@ -35,6 +35,7 @@ Amplify.configure(config);
 //Auth Tab Screen Imports
 import SignInScreen from './screens/signInScreen';
 import SignUpScreen from './screens/signUpScreen';
+import IntroScreen from './screens/introScreen.js';
 
 //App Tab Screen Imports
 import HomeScreen from './screens/homeScreen';
@@ -145,7 +146,8 @@ function MyTabs() {
 
 function HomeStack() {
   return (
-      <Stack.Navigator initialRouteName="signInScreen" screenOptions={{headerShown: false}}>
+      <Stack.Navigator initialRouteName="introScreen" screenOptions={{headerShown: false}}>
+        <Stack.Screen name="introScreen" component={IntroScreen}/>
         <Stack.Screen name="signInScreen" component={SignInScreen}/>
         <Stack.Screen name="signUpScreen" component={SignUpScreen}/>
         <Stack.Screen name="Tabs" component={MyTabs} screenOptions={{headerShown: false}} />
