@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand, PutCommand, ScanCommand, DeleteCommand } from '@aws-sdk/lib-dynamodb';
 import https from 'https';
 
 const dynamodbClient = new DynamoDBClient();
@@ -7,11 +7,12 @@ const ddbDocClient = DynamoDBDocumentClient.from(dynamodbClient);
 
 const ASTRONOMY_API_URL = 'https://astronomy-calendar.p.rapidapi.com/events.php?year=2024';
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
-const TABLE_NAME = 'testTable2';
+const TABLE_NAME = 'CelestialData';
 
 const changeDateFormat = (dateStr) => {
     const [monthStr, dayPart] = dateStr.split(' ');
-    const day = dayPart.split(',')[0]; 
+    const day = dayPart.split(',')[0];
+
     const monthMap = {
         January: '01', 
         February: '02', 
@@ -27,11 +28,9 @@ const changeDateFormat = (dateStr) => {
         December: '12'
     };
     const month = monthMap[monthStr];
-    const year = new Date().getFullYear(); 
-
+    const year = new Date().getFullYear();
     return `${year}-${month}-${String(day).padStart(2, '0')}`;
 };
-
 
 const fetchCelestialEvents = () => {
     return new Promise((resolve, reject) => {
@@ -58,48 +57,66 @@ const fetchCelestialEvents = () => {
 
 export const handler = async () => {
     try {
+        const scanParams = {
+            TableName: TABLE_NAME
+        };
+        const scanResult = await ddbDocClient.send(new ScanCommand(scanParams));
+        const existingEvents = scanResult.Items || []; 
+
         const celestialResponse = await fetchCelestialEvents();
 
-        const celestialEvents = celestialResponse.map(event => {
-            const isoDate = changeDateFormat(event.date);
-            return {
-                date: isoDate,
+        const celestialEventsMap = celestialResponse.reduce((acc, event) => {
+            const isoDate = changeDateFormat(event.date); 
+            const fixedImageUrl = event.image.replace('http :', 'http:');
+            acc[isoDate] = {
                 title: event.title,
                 content: event.content,
-                image: event.image
+                image: fixedImageUrl 
             };
-        });
+            return acc;
+        }, {});
 
-        for (const event of celestialEvents) {
-            const eventDate = event.date; 
-            const getItemParams = {
-                TableName: TABLE_NAME,
-                Key: { date: eventDate }
-            };
+        for (const item of existingEvents) {
+            const eventDate = item.date;
 
-            const result = await ddbDocClient.send(new GetCommand(getItemParams));
-
-            if (result.Item) {
+            if (celestialEventsMap[eventDate]) {
                 const updateParams = {
+                    TableName: TABLE_NAME,
+                    Key: { date: eventDate },
+                    UpdateExpression: 'SET #eventType.celestial = :emptyList',
+                    ExpressionAttributeNames: { '#eventType': 'eventType' },
+                    ExpressionAttributeValues: { ':emptyList': [] }
+                };
+                await ddbDocClient.send(new UpdateCommand(updateParams));
+
+                const newEvent = celestialEventsMap[eventDate];
+
+                const putItemParams = {
                     TableName: TABLE_NAME,
                     Key: { date: eventDate },
                     UpdateExpression: 'SET #eventType.celestial = list_append(if_not_exists(#eventType.celestial, :emptyList), :celestialEvent)',
                     ExpressionAttributeNames: { '#eventType': 'eventType' },
                     ExpressionAttributeValues: {
                         ':celestialEvent': [{
-                            title: event.title,
-                            content: event.content,
-                            image: event.image
+                            title: newEvent.title,
+                            content: newEvent.content,
+                            image: newEvent.image
                         }],
                         ':emptyList': []
                     }
                 };
-                await ddbDocClient.send(new UpdateCommand(updateParams));
-            } else {
+                await ddbDocClient.send(new UpdateCommand(putItemParams));
+            }
+        }
+
+        for (const [date, event] of Object.entries(celestialEventsMap)) {
+            const existingEvent = existingEvents.find(e => e.date === date);
+
+            if (!existingEvent) {
                 const putItemParams = {
                     TableName: TABLE_NAME,
                     Item: {
-                        date: eventDate,
+                        date: date,
                         eventType: {
                             celestial: [{
                                 title: event.title,
@@ -107,7 +124,30 @@ export const handler = async () => {
                                 image: event.image
                             }],
                             social: [],
-                            weather: {}
+                            
+                        }
+                    }
+                };
+                await ddbDocClient.send(new PutCommand(putItemParams));
+            }
+            else {
+                const deleteParams = {
+                    TableName: TABLE_NAME,
+                    Key: { date: date }
+                };
+                await ddbDocClient.send(new DeleteCommand(deleteParams));
+
+                const putItemParams = {
+                    TableName: TABLE_NAME,
+                    Item: {
+                        date: date,
+                        eventType: {
+                            celestial: [{
+                                title: event.title,
+                                content: event.content,
+                                image: event.image
+                            }],
+                            social: [],                            
                         }
                     }
                 };
@@ -117,14 +157,14 @@ export const handler = async () => {
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Celestial events successfully stored.' })
+            body: JSON.stringify({ message: 'Celestial events successfully updated.' })
         };
 
     } catch (error) {
-        console.error('Error storing celestial events:', error);
+        console.error('Error updating celestial events:', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Failed to store celestial events.' })
+            body: JSON.stringify({ error: 'Failed to update celestial events.' })
         };
     }
 };
