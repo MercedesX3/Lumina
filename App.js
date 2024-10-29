@@ -1,48 +1,30 @@
-import React, { useEffect, useState }  from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  SafeAreaView,
-  StatusBar,
-  KeyboardAvoidingView,
-  Keyboard,
-  Alert,
-  Animated,
   TextInput,
-  Pressable,
-  FlatList,
-  ScrollView,
-  Image
+  Image,
+  Button,
 } from 'react-native';
-import {
-  Authenticator,
-  useAuthenticator,
-  useTheme,
-  withAuthenticator,
-} from '@aws-amplify/ui-react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-//Amplify
 import { Amplify } from 'aws-amplify';
 import config from './src/amplifyconfiguration.json';
-Amplify.configure(config);
+import { Authenticator, useAuthenticator, ConfirmSignUp, ConfirmSignIn} from '@aws-amplify/ui-react-native';
+//import {SignIn, SignUp, ConfirmSignUp, ConfirmSignIn} from 'aws-amplify-react-native';
 
-//Auth Tab Screen Imports
-import SignInScreen from './screens/signInScreen';
-import SignUpScreen from './screens/signUpScreen';
-import IntroScreen from './screens/introScreen.js';
-
-//App Tab Screen Imports
-import HomeScreen from './screens/homeScreen';
-import CalendarScreen from './screens/calendarScreen';
-import TrackerScreen from './screens/trackerScreen';
-import EventScreen from './screens/eventScreen';
-import ProfileScreen from './screens/profileScreen';
+// Screen Imports
+import IntroScreen from '../lumina4.0/screens/introScreen.js';
+import HomeScreen from '../lumina4.0/screens/homeScreen';
+import CalendarScreen from '../lumina4.0/screens/calendarScreen';
+import TrackerScreen from '../lumina4.0/screens/trackerScreen';
+import EventScreen from '../lumina4.0/screens/eventScreen';
+import ProfileScreen from '../lumina4.0/screens/profileScreen';
+import EventDetailsScreen from '../lumina4.0/features/eventScreenFeatures/extraScreens/EventDetailsScreen';
+import WeeklyCalendarScreen from '../lumina4.0/features/calendarScreenFeatures/extraScreens/weeklyCalendarScreen';
 
 //filled icons
 import FilledHomeIcon from '/Users/thebenzsecrets/lumina4.0/assets/filledIcons/icons8-home-48 (3).png';
@@ -58,294 +40,164 @@ import UnfilledTrackerIcon from '/Users/thebenzsecrets/lumina4.0/assets/unfilled
 import UnfilledEventIcon from '/Users/thebenzsecrets/lumina4.0/assets/unfilledIcons/icons8-three-people-48 (3).png';
 import UnfilledProfileIcon from '/Users/thebenzsecrets/lumina4.0/assets/unfilledIcons/icons8-person-48.png';
 
-//Non-permanent
-import { generateClient } from 'aws-amplify/api';
-import { createTodo } from './src/graphql/mutations';
-import { listTodos } from './src/graphql/queries';
-
-//event screen imports
-import EventDetailsScreen from './features/eventScreenFeatures/extraScreens/EventDetailsScreen';
-
-//calendarScreenImports
-import WeeklyCalendarScreen from './features/calendarScreenFeatures/extraScreens/weeklyCalendarScreen.js';
-
-
+Amplify.configure(config);
 
 const Stack = createNativeStackNavigator();
-
-//Configurations and options for the tab navigator
-const configurations = {
-  Home: {
-    screen: HomeScreen,
-  },
-  Calendar: {
-    screen: CalendarScreen,
-  },
-  Tracker: {
-    screen: TrackerScreen,
-  },
-}
-
-const options = {
-      tabBarShowLabel: false,
-      tabBarActiveTintColor: 'tomato', // Active tab color
-      tabBarInactiveTintColor: 'gray', // Inactive tab color
-      tabBarStyle: { backgroundColor: 'black', height: 80 }, // Tab bar background color
-      tabBarLabelStyle: { fontSize: 12 }, // Font size of tab labels
-      tabBarIconStyle: { marginTop: 15 }, // Adjust the icon position
-      headerShown: false,
-}
-
-//bottom app tabs
 const Tab = createBottomTabNavigator();
 
 function MyTabs() {
   return (
-    <Tab.Navigator screenOptions={({ route }) => ({
-      // Icons for each tab
-      tabBarIcon: ({ focused }) => {
-        let iconName;
-        if (route.name === 'homeScreen') {
-          iconName = focused ? FilledHomeIcon : UnfilledHomeIcon;
-        } else if (route.name === 'calendarScreen') {
-          iconName = focused ? FilledCalendarIcon : UnfilledCalendarIcon;
-        } else if (route.name === 'trackerScreen') {
-          iconName = focused ? FilledTrackerIcon : UnfilledTrackerIcon;
-        } else if (route.name === 'eventScreen') {
-          iconName = focused ? FilledEventIcon : UnfilledEventIcon;
-        } else if (route.name === 'profileScreen') {
-          iconName = focused ? FilledProfileIcon : UnfilledProfileIcon;
-        }
-        return <Image source={iconName} style={{width: 24, height: 24}} />;
-      },
-      // Tab bar styling
-      tabBarShowLabel: false,
-      tabBarActiveTintColor: 'tomato', // Active tab color
-      tabBarInactiveTintColor: 'gray', // Inactive tab color
-      tabBarStyle: { backgroundColor: 'black', height: 80 }, // Tab bar background color
-      tabBarLabelStyle: { fontSize: 12 }, // Font size of tab labels
-      tabBarIconStyle: { marginTop: 15 }, // Adjust the icon position
-      headerShown: false,
-    })}>
-        <Tab.Screen name="homeScreen" component={HomeScreen}/>
-        <Tab.Screen name="calendarScreen" component={CalendarScreen} />
-        <Tab.Screen name="trackerScreen" component={TrackerScreen}/>
-        <Tab.Screen name="eventScreen" component={EventScreen}/>
-        <Tab.Screen name="profileScreen" component={ProfileScreen}/>
-        
-        {/* NOT ON TAB BAR */}
-        <Tab.Screen name="eventDetailsScreen" component={EventDetailsScreen} options={{
-          tabBarButton: () => null, // Hides the tab from the tab bar
-        }}/>
-        <Tab.Screen name="weeklyCalendarScreen" component={WeeklyCalendarScreen} options={{
-          tabBarButton: () => null,
-        }}/>
-      </Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused }) => {
+          let iconName;
+          if (route.name === 'homeScreen') {
+            iconName = focused ? FilledHomeIcon : UnfilledHomeIcon;
+          } else if (route.name === 'calendarScreen') {
+            iconName = focused ? FilledCalendarIcon : UnfilledCalendarIcon;
+          } else if (route.name === 'trackerScreen') {
+            iconName = focused ? FilledTrackerIcon : UnfilledTrackerIcon;
+          } else if (route.name === 'eventScreen') {
+            iconName = focused ? FilledEventIcon : UnfilledEventIcon;
+          } else if (route.name === 'profileScreen') {
+            iconName = focused ? FilledProfileIcon : UnfilledProfileIcon;
+          }
+          return <Image source={iconName} style={{ width: 24, height: 24 }} />;
+        },
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: 'tomato',
+        tabBarInactiveTintColor: 'gray',
+        tabBarStyle: { backgroundColor: 'black', height: 80 },
+        headerShown: false,
+      })}
+    >
+      <Tab.Screen name="homeScreen" component={HomeScreen} />
+      <Tab.Screen name="calendarScreen" component={CalendarScreen} />
+      <Tab.Screen name="trackerScreen" component={TrackerScreen} />
+      <Tab.Screen name="eventScreen" component={EventScreen} />
+      <Tab.Screen name="profileScreen" component={ProfileScreen} />
+      <Tab.Screen name="eventDetailsScreen" component={EventDetailsScreen} options={{ tabBarButton: () => null }} />
+      <Tab.Screen name="weeklyCalendarScreen" component={WeeklyCalendarScreen} options={{ tabBarButton: () => null }} />
+    </Tab.Navigator>
   );
 }
 
 function HomeStack() {
   return (
-      <Stack.Navigator initialRouteName="introScreen" screenOptions={{headerShown: false}}>
-        <Stack.Screen name="introScreen" component={IntroScreen}/>
-        <Stack.Screen name="signInScreen" component={SignInScreen}/>
-        <Stack.Screen name="signUpScreen" component={SignUpScreen}/>
-        <Stack.Screen name="Tabs" component={MyTabs} screenOptions={{headerShown: false}} />
-      </Stack.Navigator>
-
+    <Stack.Navigator initialRouteName="introScreen" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="introScreen" component={IntroScreen} />
+      <Stack.Screen name="Tabs" component={MyTabs} />
+    </Stack.Navigator>
   );
 }
 
-
-
-// retrieves only the current value of 'user' from 'useAuthenticator'
-// function userSelector(context) {
-//   return [context.user];
-// }
-
-// const SignOutButton = () => {
-//   const { user, signOut } = useAuthenticator(userSelector);
-//   return (
-//     <Pressable onPress={signOut} style={styles.buttonContainer}>
-//       <Text style={styles.buttonText}>
-//         Hello, {user.username}! Click here to sign out!
-//       </Text>
-//     </Pressable>
-//   );
-// };
-
-const initialFormState = { name: '', description: '' };
-const client = generateClient();
-
-const App = () => {
-  const [formState, setFormState] = useState(initialFormState);
-  const [todos, setTodos] = useState([]);
-
-  useEffect(() => {
-    fetchTodos();
-  }, []);
-
-  function setInput(key, value) {
-    setFormState({ ...formState, [key]: value });
-  }
-
-  async function fetchTodos() {
-    try {
-      const todoData = await client.graphql({
-        query: listTodos
-      });
-      const todos = todoData.data.listTodos.items;
-      setTodos(todos);
-    } catch (err) {
-      console.log('error fetching todos');
-    }
-  }
-
-  async function addTodo() {
-    try {
-      if (!formState.name || !formState.description) return;
-      const todo = { ...formState };
-      setTodos([...todos, todo]);
-      setFormState(initialFormState);
-      await client.graphql({
-        query: createTodo,
-        variables: { input: todo }
-      });
-    } catch (err) {
-      console.log('error creating todo:', err);
-    }
-  }
+function AppContent() {
+  const { user } = useAuthenticator((context) => [context.user]);
 
   return (
     <NavigationContainer>
-    {/* <SafeAreaView style={styles.container}> */}
-      <View style={{flex: 1}}>
-        {/* <SignOutButton /> */}
-        {/* <TextInput
-          onChangeText={(value) => setInput('name', value)}
-          style={styles.input}
-          value={formState.name}
-          placeholder="Name"
-        />
-        <TextInput
-          onChangeText={(value) => setInput('description', value)}
-          style={styles.input}
-          value={formState.description}
-          placeholder="Description"
-        />
-        <Pressable onPress={addTodo} style={styles.buttonContainer}>
-          <Text style={styles.buttonText}>Create todo</Text>
-        </Pressable>
-        {todos.map((todo, index) => (
-          <View key={todo.id ? todo.id : index} style={styles.todo}>
-            <Text style={styles.todoName}>{todo.name}</Text>
-            <Text style={styles.todoDescription}>{todo.description}</Text>
-          </View>
-        ))} */}
-        <HomeStack/>
-      </View>
-    {/* </SafeAreaView> */}
+      {user ? <HomeStack /> : <Authenticator components={{ SignIn: CustomLogin, SignUp: CustomSignUp }} />}
     </NavigationContainer>
   );
-};
+}
 
-const customeTheme = {...useTheme};
+function CustomLogin() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { signIn } = useAuthenticator(); // Access signIn here
 
-export default withAuthenticator(App);
+  const handleSignIn = async () => {
+    try {
+      await signIn({
+        username: email,
+        password,
+      });
+      console.log('Login successful!');
+    } catch (error) {
+      console.log('Error logging in:', error);
+    }
+  };
+
+  return (
+    <View style={styles.loginContainer}>
+      <Text style={styles.title}>Custom Login</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Enter your password"
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
+      <Button title="Log In" onPress={handleSignIn} />
+    </View>
+  );
+}
+
+function CustomSignUp() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [state, setState] = useState('');
+  const [city, setCity] = useState('');
+  const { toSignUp } = useAuthenticator(); // Access signUp here
+
+  const handleSignUp = async () => {
+    try {
+      await signUp({
+        username: email,
+        password,
+        attributes: {
+          email,
+          'custom:state': state,
+          'custom:city': city,
+        },
+      });
+      console.log('Sign-up successful!');
+    } catch (error) {
+      console.log('Error signing up:', error);
+    }
+  };
+
+  return (
+    <View style={styles.signUpContainer}>
+      <Text style={styles.title}>Custom Sign Up</Text>
+      <TextInput style={styles.input} placeholder="Enter your email" value={email} onChangeText={setEmail} />
+      <TextInput style={styles.input} placeholder="Enter your password" secureTextEntry value={password} onChangeText={setPassword} />
+      <TextInput style={styles.input} placeholder="Enter your state" value={state} onChangeText={setState} />
+      <TextInput style={styles.input} placeholder="Enter your city" value={city} onChangeText={setCity} />
+      <Button title="Sign Up" onPress={handleSignUp} />
+    </View>
+  );
+}
+
+export default function App() {
+  return (
+    <Authenticator.Provider>
+      <AppContent/>
+    </Authenticator.Provider>
+  );
+}
 
 const styles = StyleSheet.create({
-  container: {flex: 1, alignSelf: 'center', backgroundColor: 'black'},
-  todo: { marginBottom: 15 },
+  signUpContainer: {
+    alignItems: 'center',
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    marginBottom: 20,
+  },
   input: {
-    backgroundColor: '#ddd',
-    marginBottom: 10,
-    padding: 8,
-    fontSize: 18
+    width: 250,
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    padding: 10,
+    marginVertical: 5,
   },
-  todoName: { fontSize: 20, fontWeight: 'bold' },
-  buttonContainer: {
-    alignSelf: 'center',
-    backgroundColor: 'black',
-    paddingHorizontal: 30,
-    paddingLeft: 65,
-  },
-  buttonText: { color: 'white', padding: 16, fontSize: 18 }
 });
-
-
-
-
-// import React from 'react';
-// import { Button, StyleSheet, Text, View, ImageBackground} from 'react-native';
-
-// import { Amplify } from 'aws-amplify';
-// import {
-//   Authenticator,
-//   useAuthenticator,
-//   useTheme,
-// } from '@aws-amplify/ui-react-native';
-
-// import config from './src/amplifyconfiguration.json';
-// Amplify.configure(config);
-
-// const MyAppHeader = () => {
-//   const {
-//     tokens: { space, fontSizes },
-//   } = useTheme();
-//   return (
-//     <View>
-//       <Text style={{ fontSize: fontSizes.xxxl, padding: space.xl }}>
-//         My Header
-//       </Text>
-//     </View>
-//   );
-// };
-
-// function SignOutButton() {
-//   const { signOut } = useAuthenticator();
-//   return <Button onPress={signOut} title="Sign Out" />;
-// }
-
-// function App() {
-//   const {
-//     tokens: { colors },
-//   } = useTheme();
-
-//   return (
-//     <Authenticator.Provider>
-//       <Authenticator
-//         // will wrap every subcomponent
-//         Container={(props) => (
-//           <ImageBackground 
-//             source={require('./assets/adaptive-icon.png')} // Replace with your image URL
-//             style={styles.background} // Apply styles for the background image
-//           >
-//             <Authenticator.Container {...props} style={{backgroundColor: 'white' }}>
-//             </Authenticator.Container>
-//           </ImageBackground>
-//         )}
-//         // will render on every subcomponent
-//         Header={MyAppHeader}
-//       >
-//         <View style={styles.container}>
-//           <SignOutButton />
-//         </View>
-//       </Authenticator>
-//     </Authenticator.Provider>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: { 
-//     flex: 1, 
-//     alignItems: 'center', 
-//     justifyContent: 'center',
-//   },
-//   background: {
-//     flex: 1, // Make sure the background takes the full size
-//     justifyContent: 'center', // Center the content vertically
-//     alignItems: 'center', // Center the content horizontally
-//   },
-// });
-
-// export default App;

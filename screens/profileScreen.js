@@ -37,7 +37,7 @@ const ProfileScreen = () => {
 
   return (
       <ImageBackground
-        source={require('/Users/thebenzsecrets/lumina4.0/assets/profileScreenImages/profilebg.png')}
+        source={require('/Users/thebenzsecrets/lumina4.0/assets/profileScreenImages/Untitled design (6).png')}
         style={styles.container}
       >
         <View style={styles.profile}>
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   signOutButton: {
-    backgroundColor: '#301934',
+    backgroundColor: '#7B62A9',
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderRadius: 10,
