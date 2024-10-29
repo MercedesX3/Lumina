@@ -96,69 +96,85 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      {user ? <HomeStack /> : <Authenticator components={{ SignUp: CustomSignUp }} />}
+      {user ? <HomeStack /> : <Authenticator />}
     </NavigationContainer>
   );
 }
 
-function CustomSignUp({ signUp }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [state, setState] = useState('');
-  const [city, setCity] = useState('');
+// function CustomSignUp({ signUp }) {
+//   const [email, setEmail] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [state, setState] = useState('');
+//   const [city, setCity] = useState('');
 
-  const handleSignUp = async () => {
-    try {
-      await signUp({
-        username: email,
-        password,
-        attributes: {
-          email,
-          'custom:state': state,
-          'custom:city': city,
-        },
-      });
-      console.log('Sign-up successful!');
-    } catch (error) {
-      console.log('Error signing up:', error);
-    }
-  };
+//   const handleSignUp = async () => {
+//     try {
+//       await signUp({
+//         username: email,
+//         password,
+//         attributes: {
+//           email,
+//           'custom:state': state,
+//           'custom:city': city,
+//         },
+//       });
+//       console.log('Sign-up successful!');
+//     } catch (error) {
+//       console.log('Error signing up:', error);
+//     }
+//   };
 
+//   return (
+//     <View style={styles.signUpContainer}>
+//       <Text style={styles.title}>Custom Sign Up</Text>
+//       <TextInput style={styles.input} placeholder="Enter your email" value={email} onChangeText={setEmail} />
+//       <TextInput style={styles.input} placeholder="Enter your password" secureTextEntry value={password} onChangeText={setPassword} />
+//       <TextInput style={styles.input} placeholder="Enter your state" value={state} onChangeText={setState} />
+//       <TextInput style={styles.input} placeholder="Enter your city" value={city} onChangeText={setCity} />
+//       <Button title="Sign Up" onPress={handleSignUp} />
+//     </View>
+//   );
+// }
+
+export default function App() {
   return (
-    <View style={styles.signUpContainer}>
-      <Text style={styles.title}>Custom Sign Up</Text>
-      <TextInput style={styles.input} placeholder="Enter your email" value={email} onChangeText={setEmail} />
-      <TextInput style={styles.input} placeholder="Enter your password" secureTextEntry value={password} onChangeText={setPassword} />
-      <TextInput style={styles.input} placeholder="Enter your state" value={state} onChangeText={setState} />
-      <TextInput style={styles.input} placeholder="Enter your city" value={city} onChangeText={setCity} />
-      <Button title="Sign Up" onPress={handleSignUp} />
+    <View style={styles.container}>
+      <Authenticator.Provider>
+        <Authenticator
+          formFields={{
+            signUp: {
+              email: {
+                label: 'Email',
+                placeholder: 'Enter your email',
+                isRequired: true,
+              },
+              password: {
+                label: 'Password',
+                placeholder: 'Enter your password',
+                isRequired: true,
+              },
+              'custom:state': {
+                label: 'State',
+                placeholder: 'Enter your state',
+                isRequired: true,
+              },
+              'custom:city': {
+                label: 'City',
+                placeholder: 'Enter your city',
+                isRequired: true,
+              },
+            },
+          }}
+        >
+          <AppContent/>
+        </Authenticator>
+      </Authenticator.Provider>
     </View>
   );
 }
 
-export default function App() {
-  return (
-    <Authenticator.Provider>
-      <AppContent />
-    </Authenticator.Provider>
-  );
-}
-
 const styles = StyleSheet.create({
-  signUpContainer: {
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
-  input: {
-    width: 250,
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    padding: 10,
-    marginVertical: 5,
+  container: {
+    flex: 1,
   },
 });
