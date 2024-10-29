@@ -13,7 +13,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { Amplify } from 'aws-amplify';
 import config from './src/amplifyconfiguration.json';
-import { Authenticator, useAuthenticator, ConfirmSignUp, ConfirmSignIn} from '@aws-amplify/ui-react-native';
+import { Authenticator, useAuthenticator, useTheme} from '@aws-amplify/ui-react-native';
 //import {SignIn, SignUp, ConfirmSignUp, ConfirmSignIn} from 'aws-amplify-react-native';
 
 // Screen Imports
@@ -96,7 +96,7 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      {user ? <HomeStack /> : <Authenticator />}
+      {user ? <MyTabs /> : <Authenticator />}
     </NavigationContainer>
   );
 }
@@ -137,10 +137,22 @@ function AppContent() {
 // }
 
 export default function App() {
+  const {
+    tokens: { colors },
+  } = useTheme();
+
   return (
     <View style={styles.container}>
       <Authenticator.Provider>
         <Authenticator
+          Container={(props) => (
+            // reuse default `Container` and apply custom background
+            <Authenticator.Container
+              {...props}
+              style={{ backgroundColor: 'white'}}
+            />
+          )}
+          // will render on every subcomponent
           formFields={{
             signUp: {
               email: {
@@ -163,7 +175,7 @@ export default function App() {
                 placeholder: 'Enter your city',
                 isRequired: true,
               },
-            },
+            }
           }}
         >
           <AppContent/>
@@ -176,5 +188,13 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  signInText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  footerText: {
+    fontSize: 16,
   },
 });
