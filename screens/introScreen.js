@@ -27,7 +27,7 @@ const IntroScreen = () => {
   };
 
   const handleStartPress = () => {
-    navigation.navigate('Tabs');
+    navigation.navigate('authenticationScreens');
   };
 
   return (

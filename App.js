@@ -86,7 +86,7 @@ function HomeStack() {
   return (
     <Stack.Navigator initialRouteName="introScreen" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="introScreen" component={IntroScreen} />
-      <Stack.Screen name="Tabs" component={MyTabs} />
+      <Stack.Screen name="authenticationScreens" component={AuthenticationScreens} />
     </Stack.Navigator>
   );
 }
@@ -95,9 +95,9 @@ function AppContent() {
   const { user } = useAuthenticator((context) => [context.user]);
 
   return (
-    <NavigationContainer>
+    <View style={styles.container}>
       {user ? <MyTabs /> : <Authenticator />}
-    </NavigationContainer>
+    </View>
   );
 }
 
@@ -136,7 +136,7 @@ function AppContent() {
 //   );
 // }
 
-export default function App() {
+function AuthenticationScreens() {
   const {
     tokens: { colors },
   } = useTheme();
@@ -182,6 +182,14 @@ export default function App() {
         </Authenticator>
       </Authenticator.Provider>
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <HomeStack/>
+    </NavigationContainer>
   );
 }
 
