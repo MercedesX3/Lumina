@@ -96,55 +96,16 @@ function AppContent() {
 
   return (
     <NavigationContainer>
-      {user ? <HomeStack /> : <Authenticator components={{ SignIn: CustomLogin, SignUp: CustomSignUp }} />}
+      {user ? <HomeStack /> : <Authenticator components={{ SignUp: CustomSignUp }} />}
     </NavigationContainer>
   );
 }
 
-function CustomLogin() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { signIn } = useAuthenticator(); // Access signIn here
-
-  const handleSignIn = async () => {
-    try {
-      await signIn({
-        username: email,
-        password,
-      });
-      console.log('Login successful!');
-    } catch (error) {
-      console.log('Error logging in:', error);
-    }
-  };
-
-  return (
-    <View style={styles.loginContainer}>
-      <Text style={styles.title}>Custom Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your email"
-        value={email}
-        onChangeText={setEmail}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your password"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <Button title="Log In" onPress={handleSignIn} />
-    </View>
-  );
-}
-
-function CustomSignUp() {
+function CustomSignUp({ signUp }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [state, setState] = useState('');
   const [city, setCity] = useState('');
-  const { toSignUp } = useAuthenticator(); // Access signUp here
 
   const handleSignUp = async () => {
     try {
@@ -178,7 +139,7 @@ function CustomSignUp() {
 export default function App() {
   return (
     <Authenticator.Provider>
-      <AppContent/>
+      <AppContent />
     </Authenticator.Provider>
   );
 }
