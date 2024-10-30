@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, ScrollView, Image} from 'react-native';
+import { View, Text, Button,StyleSheet, TouchableOpacity, ImageBackground, Dimensions, ScrollView, Image} from 'react-native';
 import MonthlyData from "/Users/thebenzsecrets/lumina4.0/features/calendarScreenFeatures/month1/monthlyData.json";
 import { FlatList } from 'react-native-gesture-handler';
 import CalendarEventCarousel from '../carousels/calendarEventCarousel';
@@ -7,6 +7,21 @@ import CalendarEventCarousel from '../carousels/calendarEventCarousel';
 const screenHeight = Dimensions.get('window').height; //852
 const screenWidth = Dimensions.get('window').width; //393
 const dayWidth = screenWidth / 7;
+
+
+const API_BASE_URL = 'https://dxunvp6jg0.execute-api.us-east-2.amazonaws.com/events/testFunction';
+import axios from 'axios';
+
+// Create a new day
+async function createDay(date) {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/${date}`);
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching item:", error);
+  }
+}
 
 const WeeklyCalendarScreen = ({route}) => {
     const {year, month, dog} = route.params;
@@ -47,6 +62,10 @@ const WeeklyCalendarScreen = ({route}) => {
     const getDate = () => {
         return new Date(year, month, dog);
     };
+
+    useEffect(() => {
+        createDay("10-30-24"); // Fetch an item when component loads
+      }, []);
 
     const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     const shortDaysOfTheWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
@@ -115,6 +134,7 @@ const WeeklyCalendarScreen = ({route}) => {
                 <CalendarEventCarousel items={lists}/>
             </View>
 
+            <Button style={{color: 'black'}}title="Create Item" onPress={() => createDay({ date: "10-30-24" })} />
             </ScrollView>
         </ImageBackground>
 

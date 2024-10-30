@@ -39,7 +39,7 @@ export default class EventScreen extends React.Component {
                       fontSize: 20,
                       color: 'white',
                       marginLeft: 20,
-                    }}>STARGAZING</Text>
+                    }}>CELESTIAL</Text>
 
                     <StarGazingCarousel list={starEvents}/>
                   </View>
@@ -49,18 +49,18 @@ export default class EventScreen extends React.Component {
                       fontSize: 20,
                       color: 'white',
                       marginLeft: 20,
-                    }}>PLANETS</Text>
+                    }}>SOCIAL</Text>
                     <PlanetCarousel list={planetEvents}/>
                   </View>
 
-                  <View>
+                  {/* <View>
                     <Text style={{
                       fontSize: 20,
                       color: 'white',
                       marginLeft: 20,
                     }}>PLANETS</Text>
                     <LunarSolarCarousel list={lunarAndSolarEvents}/>
-                  </View>
+                  </View> */}
                 </ScrollView>
               </SafeAreaView>
             </ImageBackground>

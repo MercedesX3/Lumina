@@ -1,11 +1,21 @@
-import React from 'react';
-import { View, ScrollView, SafeAreaView, StyleSheet, Image, BackHandler, Text, ImageBackground, TextInput} from "react-native";
+import React, {useState} from 'react';
+import { View, ScrollView, SafeAreaView, StyleSheet, Image, TouchableOpacity, Text, ImageBackground, Pressable} from "react-native";
 import { LinearGradient } from 'expo-linear-gradient';
 import EventDetailButton from '../buttons/EventDetailButtons';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
+const unfilledHeart = require('../../../assets/eventScreenImages/icons8-heart-48 (1).png');
+const filledHeart = require('../../../assets/eventScreenImages/icons8-heart-48.png');
 
 const EventDetailsScreen = ({navigation, route}) => {
     const {trip} = route.params;
+    const [isPinned, setIsPinned] = useState(false);
+
+    const togglePin = () => {
+        setIsPinned(!isPinned);
+    };
+
     return (
+        <GestureHandlerRootView>
         <ImageBackground source={require("/Users/thebenzsecrets/lumina4.0/assets/eventScreenImages/EventBackground.jpeg")} style={styles.container}>
             <SafeAreaView>
                 {/* <View>
@@ -18,6 +28,12 @@ const EventDetailsScreen = ({navigation, route}) => {
                     <View style={styles.imageBox}>
                         <Image source={trip.image} style={[StyleSheet.absoluteFillObject, styles.image]}/>
                         <EventDetailButton onPress={() => navigation.navigate("eventScreen")}/>
+                        <Pressable style={{backgroundColor: '#FFFFFF', height: 70, width: 70, top: 280, alignSelf: 'flex-end', right: 20, borderRadius: 30}} onPress={togglePin}>
+                            <Image
+                            source={isPinned ? unfilledHeart : filledHeart}
+                            style={{top: 12, alignSelf: 'center', opacity: 0.2}}
+                            />
+                        </Pressable>
                     </View>
                     <LinearGradient colors={['rgba(0,0,0,0.8)', 'transparent']} style={styles.infoBox}>
                         <Text style={styles.title}>{trip.name}</Text>
@@ -29,6 +45,7 @@ const EventDetailsScreen = ({navigation, route}) => {
                 </ScrollView>
             </SafeAreaView>
         </ImageBackground>
+        </GestureHandlerRootView>
     );
 };
 
